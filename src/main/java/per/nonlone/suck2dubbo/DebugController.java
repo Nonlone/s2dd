@@ -48,7 +48,6 @@ public class DebugController {
         DebugReferenceConfig<GenericService> reference = new DebugReferenceConfig<GenericService>();
         reference.setGeneric(true);
         reference.setInterface(classOfService);
-        // reference.setConsumer(ConsumerConfig);
         reference.setVersion(version);
         reference.setUrl(DUBBO_PROTOCOL+"://"+ip+":"+port);
         reference.setProtocol(DUBBO_PROTOCOL);
