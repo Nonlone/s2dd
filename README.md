@@ -2,7 +2,7 @@
 
 ## 启动方法
 
-依赖 openjdk 1.8+
+依赖 openjdk 1.8+ -D为自定义参数，可以填入spring参数
 
 java [-Dxxxx=yyyy] -jar s2dd.jar
 
