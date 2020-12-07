@@ -33,7 +33,7 @@ public class DebugController {
      * @param data
      * @return
      */
-    @PostMapping("dd/{ip}/{port}//{class}/{method}")
+    @PostMapping("dd/{ip}/{port}/{class}/{method}")
     public Object debugDirect(
         @PathVariable("ip") String ip,
         @PathVariable("port") String port,
