@@ -9,10 +9,10 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>per.nonlone</groupId>
-    <artifactId>suck-to-dubbo</artifactId>
+    <artifactId>s2dd</artifactId>
     <version>1.0.0-SNAPSHOT</version>
-    <name>Suck2Dubbo</name>
-    <description>Simple Debug To Dubbo</description>
+    <name>s2dd</name>
+    <description>Simple To Debug Dubbo</description>
 
     <properties>
         <java.version>1.8</java.version>
