@@ -129,7 +129,7 @@ public class DebugController {
                 serviceName = serviceName + version + ":";
             }
             if(StringUtils.isNotBlank(group)){
-                serviceName = serverAddr + group;
+                serviceName = serviceName + group;
             }
             Instance instance = namingService.selectInstances(serviceName,true).get(0);
             log.info("use instance ip<{}> port<{}>",instance.getIp(),instance.getPort());
