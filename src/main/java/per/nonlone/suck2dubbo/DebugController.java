@@ -1,11 +1,20 @@
 package per.nonlone.suck2dubbo;
 
 import java.util.Map;
+import java.util.Objects;
+import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
 
+import com.alibaba.nacos.api.NacosFactory;
+import com.alibaba.nacos.api.PropertyKeyConst;
+import com.alibaba.nacos.api.exception.NacosException;
+import com.alibaba.nacos.api.naming.NamingService;
+import com.alibaba.nacos.api.naming.pojo.Instance;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.dubbo.config.ReferenceConfig;
-import org.apache.dubbo.config.RegistryConfig;
 import org.apache.dubbo.rpc.service.GenericService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,12 +22,21 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
+
 @RestController
+@Slf4j
 public class DebugController {
 
     private static final String DUBBO_PROTOCOL = "dubbo";
 
     private static final String NACOS_PROTOCOL = "nacos";
+
+    private static final String PRODIVERS = "providers:";
+
+    private static final Map<String,NamingService> NAMING_SERVICE_MAP = new ConcurrentHashMap<>();
+
+    @Value("dubbo.application.name")
+    private String dataId;
 
 
     @GetMapping("index")
@@ -68,22 +86,22 @@ public class DebugController {
 
 
     /**
-     * 连接Nacos调试
-     * @param namespace
-     * @param ip
-     * @param port
-     * @param classOfService
-     * @param metchod
-     * @param version
-     * @param group
-     * @param classOfRequest
-     * @param data
+     * 使用Nacos调试
+     * @param namespace nacos 配置
+     * @param serverAddr nacos 地址
+     * @param port nacos 端口
+     * @param classOfService 调用服务类
+     * @param metchod 调用服务方法
+     * @param version 调用服务方法版本
+     * @param group 调用服务组
+     * @param classOfRequest 请求类型
+     * @param data 数据体
      * @return
      */
-    @PostMapping("dwn/{namespace}/{ip}/{port}/{class}/{method}")
+    @PostMapping("dwn/{namespace}/{serverAddr}/{port}/{class}/{method}")
     public Object debugWithNacos(
         @PathVariable("namespace")String namespace,
-        @PathVariable("ip") String ip,
+        @PathVariable("serverAddr") String serverAddr,
         @PathVariable("port") String port,
         @PathVariable("class") String classOfService,
         @PathVariable("method") String metchod,
@@ -92,23 +110,45 @@ public class DebugController {
         @RequestHeader(value = "class")String classOfRequest,
         @RequestBody Map<String,Object> data
     ) {
-        RegistryConfig registryConfig=new RegistryConfig();
-        registryConfig.setAddress(NACOS_PROTOCOL+"://"+ip+":"+port+"?namespace="+namespace);
+        try {
+            String namingServiceKey =  namespace+":"+serverAddr+":"+port;
+            NamingService namingService = NAMING_SERVICE_MAP.get(namingServiceKey);
+            if(Objects.isNull(namingService)){
+                Properties properties = new Properties();
+                properties.put(PropertyKeyConst.SERVER_ADDR,serverAddr+":"+port);
+                properties.put(PropertyKeyConst.NAMESPACE,namespace);
+                namingService = NacosFactory.createNamingService(properties);
+                NAMING_SERVICE_MAP.putIfAbsent(namingServiceKey,namingService);
+            }
 
-        ReferenceConfig<GenericService> reference = new ReferenceConfig<GenericService>();
-        reference.setGeneric(true);
-        reference.setRegistry(registryConfig);
-        reference.setInterface(classOfService);
-        reference.setVersion(version);
-        // reference.setUrl(DUBBO_PROTOCOL+"://"+ip+":"+port);
-        reference.setProtocol(DUBBO_PROTOCOL);
-        if(StringUtils.isNotBlank(version)){
+            String serviceName = PRODIVERS + classOfService + ":";
+            if(StringUtils.isNotBlank(version)){
+                serviceName = serviceName + version + ":";
+            }
+            if(StringUtils.isNotBlank(group)){
+                serviceName = serverAddr + group;
+            }
+            Instance instance = namingService.selectInstances(serviceName,true).get(0);
+            ReferenceConfig<GenericService> reference = new ReferenceConfig<GenericService>();
+            reference.setGeneric(true);
+            reference.setInterface(classOfService);
             reference.setVersion(version);
+            reference.setUrl(DUBBO_PROTOCOL+"://"+instance.getIp()+":"+instance.getPort()     );
+            reference.setProtocol(DUBBO_PROTOCOL);
+            if(StringUtils.isNotBlank(version)){
+                reference.setVersion(version);
+            }
+            if(StringUtils.isNotBlank(group)){
+                reference.setGroup(group);
+            }
+            GenericService genericService = reference.get();
+            return genericService.$invoke(metchod,new String[]{classOfRequest},new Object[]{data});
+
+        }catch (NacosException ne){
+            log.error("getClient error",ne);
+            throw new RuntimeException(ne);
         }
-        if(StringUtils.isNotBlank(group)){
-            reference.setGroup(group);
-        }
-        GenericService genericService = reference.get();
-        return genericService.$invoke(metchod,new String[]{classOfRequest},new Object[]{data});
+
+
     }
 }
