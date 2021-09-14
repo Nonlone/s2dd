@@ -10,7 +10,7 @@
     </parent>
     <groupId>per.nonlone</groupId>
     <artifactId>s2dd</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.1.0</version>
     <name>s2dd</name>
     <description>Simple To Debug Dubbo</description>
 
