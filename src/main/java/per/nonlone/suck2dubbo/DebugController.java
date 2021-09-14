@@ -114,11 +114,14 @@ public class DebugController {
             String namingServiceKey =  namespace+":"+serverAddr+":"+port;
             NamingService namingService = NAMING_SERVICE_MAP.get(namingServiceKey);
             if(Objects.isNull(namingService)){
+                log.info("init nacos client namingServiceKey<{}>",namingServiceKey);
                 Properties properties = new Properties();
                 properties.put(PropertyKeyConst.SERVER_ADDR,serverAddr+":"+port);
                 properties.put(PropertyKeyConst.NAMESPACE,namespace);
                 namingService = NacosFactory.createNamingService(properties);
                 NAMING_SERVICE_MAP.putIfAbsent(namingServiceKey,namingService);
+            }else{
+                log.info("use nacos client without init namingServiceKey<{}>",namingServiceKey);
             }
 
             String serviceName = PRODIVERS + classOfService + ":";
@@ -129,6 +132,7 @@ public class DebugController {
                 serviceName = serverAddr + group;
             }
             Instance instance = namingService.selectInstances(serviceName,true).get(0);
+            log.info("use instance ip<{}> port<{}>",instance.getIp(),instance.getPort());
             ReferenceConfig<GenericService> reference = new ReferenceConfig<GenericService>();
             reference.setGeneric(true);
             reference.setInterface(classOfService);
