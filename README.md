@@ -1,4 +1,4 @@
-# Simple To Debbug Dubbo
+# Simple To Debug Dubbo
 
 ## 启动方法
 
@@ -8,6 +8,30 @@ java [-Dxxxx=yyyy] -jar s2dd.jar
 
 
 ## 说明
-提供 Http 到 Dubbo 接口的泛化调用，仅用于本地调式使用，参数如下图，ip，port，服务类，调用方法作为参数放在url path上，version，group，还有请求体类路径放在header部分，请求体作为body
+提供 Http 到 Dubbo 接口的泛化调用，仅用于本地调式使用，ip，port，服务类，调用方法作为参数放在url path上，version，group，还有请求体类路径放在header部分，请求体作为body
 
-![param](https://raw.githubusercontent.com/Nonlone/Suck2Dubbo/master/images/params.png)
+### 统一 Header 参数
+- group：服务组
+- version：服务版本
+- class: 请求类全路径
+
+### dd接口 直接Debug
+路径为 dd/{ip}/{port}/{class}/{method}
+说明如下：
+- ip：目标ip
+- port：目标端口
+- class：目标类
+- method：目标调用方法
+
+详见：DebugController#debugDirect 方法
+
+### dwn接口 debugWithNacos
+路径为 dwn/{namespace}/{serverAddr}/{port}/{class}/{method}
+说明如下：
+- namespace：对应服务提供nacos注册的namespace
+- serverAddr：nacos服务地址
+- port：nacos服务端口
+- class：目标类
+- method：目标方法
+
+详见：DebugController#debugWithNacos
