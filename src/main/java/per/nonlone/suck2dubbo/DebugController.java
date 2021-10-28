@@ -1,5 +1,6 @@
 package per.nonlone.suck2dubbo;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
@@ -10,11 +11,13 @@ import com.alibaba.nacos.api.PropertyKeyConst;
 import com.alibaba.nacos.api.exception.NacosException;
 import com.alibaba.nacos.api.naming.NamingService;
 import com.alibaba.nacos.api.naming.pojo.Instance;
+import com.google.common.collect.Maps;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.dubbo.config.ReferenceConfig;
 import org.apache.dubbo.rpc.service.GenericService;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -131,7 +134,11 @@ public class DebugController {
             if(StringUtils.isNotBlank(group)){
                 serviceName = serviceName + group;
             }
-            Instance instance = namingService.selectInstances(serviceName,true).get(0);
+            List<Instance> instanceList = namingService.selectInstances(serviceName,true);
+            if(CollectionUtils.isEmpty(instanceList)){
+                return Maps.immutableEntry("error",String.format("cannot find the provider of service in nacos； serviceName<%s>", serviceName));
+            }
+            Instance instance = instanceList.get(0);
             log.info("use instance ip<{}> port<{}>",instance.getIp(),instance.getPort());
             ReferenceConfig<GenericService> reference = new ReferenceConfig<GenericService>();
             reference.setGeneric(true);
