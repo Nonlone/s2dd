@@ -25,8 +25,9 @@ java [-Dxxxx=yyyy] -jar s2dd.jar
 - class：目标类
 - method：目标调用方法
 
-详见：DebugController#debugDirect 方法
-、、、
+详见：DebugController#debugDirect 方法，curl样例如下：
+
+```bash
 curl --location --request POST 'http://localhost:8081//dd/localhost/20886/com.yyyy.XxxxService/AaaaBbbbMethod' \
 --header 'version: 1.0.0' \
 --header 'class: com.yyyy.xxxx.ZzzzRequest' \
@@ -49,8 +50,9 @@ curl --location --request POST 'http://localhost:8081//dd/localhost/20886/com.yy
 - class：目标类
 - method：目标方法
 
-详见：DebugController#debugWithNacos
-、、、
+详见：DebugController#debugWithNacos 方法，curl样例如下：
+
+```bash
 curl --location --request POST 'http://localhost:8081/dwn/develop/nacos.xxxx.com/6801/com.yyyy.XxxxxxService/AaaaBbbbMethod' \
 --header 'version: 1.0.0' \
 --header 'class: com.yyyy.xxxx.ZzzzzRequest' \
