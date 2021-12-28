@@ -2,7 +2,7 @@
 
 ## 启动方法
 
-依赖 openjdk 1.8+ -D为自定义参数，可以填入spring参数
+依赖 openjdk 1.8+ -D为自定义参数，可以填入spring参数，进程默认占用8081端口提供Http服务
 
 java [-Dxxxx=yyyy] -jar s2dd.jar
 
@@ -26,6 +26,17 @@ java [-Dxxxx=yyyy] -jar s2dd.jar
 - method：目标调用方法
 
 详见：DebugController#debugDirect 方法
+、、、
+**curl --location --request POST 'http://localhost:8081//dd/localhost/20886/com.yyyy.XxxxService/AaaaBbbbMethod' \
+--header 'version: 1.0.0' \
+--header 'class: com.yyyy.xxxx.ZzzzRequest' \
+--header 'group: local-cccc' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "param1":"I am params",
+    "param2":"I am params"
+}'**
+```
 
 ### dwn接口 
 使用Nacos进行服务发现debug，debugWithNacos
@@ -39,3 +50,14 @@ java [-Dxxxx=yyyy] -jar s2dd.jar
 - method：目标方法
 
 详见：DebugController#debugWithNacos
+、、、
+**curl --location --request POST 'http://localhost:8081/dwn/develop/nacos.xxxx.com/6801/com.yyyy.XxxxxxService/AaaaBbbbMethod' \
+--header 'version: 1.0.0' \
+--header 'class: com.yyyy.xxxx.ZzzzzRequest' \
+--header 'group: local-cccc' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "params1":"I am params",
+    "params2":"I am params"
+}'**
+```
