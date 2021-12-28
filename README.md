@@ -27,7 +27,7 @@ java [-Dxxxx=yyyy] -jar s2dd.jar
 
 详见：DebugController#debugDirect 方法
 、、、
-**curl --location --request POST 'http://localhost:8081//dd/localhost/20886/com.yyyy.XxxxService/AaaaBbbbMethod' \
+curl --location --request POST 'http://localhost:8081//dd/localhost/20886/com.yyyy.XxxxService/AaaaBbbbMethod' \
 --header 'version: 1.0.0' \
 --header 'class: com.yyyy.xxxx.ZzzzRequest' \
 --header 'group: local-cccc' \
@@ -35,7 +35,7 @@ java [-Dxxxx=yyyy] -jar s2dd.jar
 --data-raw '{
     "param1":"I am params",
     "param2":"I am params"
-}'**
+}'
 ```
 
 ### dwn接口 
@@ -51,7 +51,7 @@ java [-Dxxxx=yyyy] -jar s2dd.jar
 
 详见：DebugController#debugWithNacos
 、、、
-**curl --location --request POST 'http://localhost:8081/dwn/develop/nacos.xxxx.com/6801/com.yyyy.XxxxxxService/AaaaBbbbMethod' \
+curl --location --request POST 'http://localhost:8081/dwn/develop/nacos.xxxx.com/6801/com.yyyy.XxxxxxService/AaaaBbbbMethod' \
 --header 'version: 1.0.0' \
 --header 'class: com.yyyy.xxxx.ZzzzzRequest' \
 --header 'group: local-cccc' \
@@ -59,5 +59,5 @@ java [-Dxxxx=yyyy] -jar s2dd.jar
 --data-raw '{
     "params1":"I am params",
     "params2":"I am params"
-}'**
+}'
 ```
