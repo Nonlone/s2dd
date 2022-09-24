@@ -14,6 +14,7 @@ java [-Dxxxx=yyyy] -jar s2dd.jar
 - group：服务组
 - version：服务版本
 - class: 请求类全路径
+- rpccontext|xxx: rpccontext 透传参数，key 为 xxx
 
 ### dd接口 
 直接Debug，debugDirect

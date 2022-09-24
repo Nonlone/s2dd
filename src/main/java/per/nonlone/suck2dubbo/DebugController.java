@@ -1,10 +1,14 @@
 package per.nonlone.suck2dubbo;
 
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import com.alibaba.nacos.api.NacosFactory;
 import com.alibaba.nacos.api.PropertyKeyConst;
@@ -15,6 +19,8 @@ import com.google.common.collect.Maps;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.dubbo.config.ReferenceConfig;
+import org.apache.dubbo.remoting.exchange.Response;
+import org.apache.dubbo.rpc.RpcContext;
 import org.apache.dubbo.rpc.service.GenericService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.CollectionUtils;
@@ -37,6 +43,8 @@ public class DebugController {
     private static final String PRODIVERS = "providers:";
 
     private static final Map<String,NamingService> NAMING_SERVICE_MAP = new ConcurrentHashMap<>();
+
+    private static final String RPC_CONTEXT_PREFIX = "rpccontext|";
 
     @Value("dubbo.application.name")
     private String dataId;
@@ -68,9 +76,10 @@ public class DebugController {
         @RequestHeader(value = "version",defaultValue = "")String version,
         @RequestHeader(value = "group",defaultValue = "")String group,
         @RequestHeader(value = "class")String classOfRequest,
-        @RequestBody Map<String,Object> data
+        @RequestBody Map<String,Object> data,
+        HttpServletRequest httpServletRequest,
+        HttpServletResponse httpServletResponse
     ) {
-
         ReferenceConfig<GenericService> reference = new ReferenceConfig<GenericService>();
         reference.setGeneric(true);
         reference.setInterface(classOfService);
@@ -83,8 +92,24 @@ public class DebugController {
         if(StringUtils.isNotBlank(group)){
             reference.setGroup(group);
         }
+        // 获取头部数据，放入rpccontext
+        Enumeration<String> headerEnmeration = httpServletRequest.getHeaderNames();
+        while (headerEnmeration.hasMoreElements()) {
+            String headerKey = headerEnmeration.nextElement();
+            if (headerKey.contains(RPC_CONTEXT_PREFIX)) {
+                String realKey = headerKey.replace(RPC_CONTEXT_PREFIX, "");
+                RpcContext.getContext().setAttachment(realKey, httpServletRequest.getHeader(headerKey));
+            }
+        }
         GenericService genericService = reference.get();
-        return genericService.$invoke(metchod,new String[]{classOfRequest},new Object[]{data});
+        Object result = genericService.$invoke(metchod,new String[]{classOfRequest},new Object[]{data});
+       
+        Map<String,Object> attachment = RpcContext.getContext().getObjectAttachments();
+        attachment.entrySet().stream().forEach(t->{
+            httpServletResponse.addHeader(t.getKey(), t.getValue().toString());
+        });
+
+        return result;
     }
 
 
@@ -111,9 +136,12 @@ public class DebugController {
         @RequestHeader(value = "version",defaultValue = "")String version,
         @RequestHeader(value = "group",defaultValue = "")String group,
         @RequestHeader(value = "class")String classOfRequest,
-        @RequestBody Map<String,Object> data
+        @RequestBody Map<String,Object> data,
+        HttpServletRequest httpServletRequest,
+        HttpServletResponse httpServletResponse
     ) {
         try {
+
             String namingServiceKey =  namespace+":"+serverAddr+":"+port;
             NamingService namingService = NAMING_SERVICE_MAP.get(namingServiceKey);
             if(Objects.isNull(namingService)){
@@ -152,8 +180,24 @@ public class DebugController {
             if(StringUtils.isNotBlank(group)){
                 reference.setGroup(group);
             }
+            // 获取头部数据，放入rpccontext
+            Enumeration<String> headerEnmeration = httpServletRequest.getHeaderNames();
+            while (headerEnmeration.hasMoreElements()) {
+                String headerKey = headerEnmeration.nextElement();
+                if (headerKey.contains(RPC_CONTEXT_PREFIX)) {
+                    String realKey = headerKey.replace(RPC_CONTEXT_PREFIX, "");
+                    RpcContext.getContext().setAttachment(realKey, httpServletRequest.getHeader(headerKey));
+                }
+            }
             GenericService genericService = reference.get();
-            return genericService.$invoke(metchod,new String[]{classOfRequest},new Object[]{data});
+            Object result = genericService.$invoke(metchod,new String[]{classOfRequest},new Object[]{data});
+
+            Map<String,Object> attachment = RpcContext.getContext().getObjectAttachments();
+            attachment.entrySet().stream().forEach(t->{
+                httpServletResponse.addHeader(t.getKey(), t.getValue().toString());
+            });
+
+            return result;
 
         }catch (NacosException ne){
             log.error("getClient error",ne);
