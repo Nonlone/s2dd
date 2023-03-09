@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ThreadLocalRandom;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -19,7 +20,6 @@ import com.google.common.collect.Maps;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.dubbo.config.ReferenceConfig;
-import org.apache.dubbo.remoting.exchange.Response;
 import org.apache.dubbo.rpc.RpcContext;
 import org.apache.dubbo.rpc.service.GenericService;
 import org.springframework.beans.factory.annotation.Value;
@@ -166,6 +166,7 @@ public class DebugController {
             if(CollectionUtils.isEmpty(instanceList)){
                 return Maps.immutableEntry("error",String.format("cannot find the provider of service in nacos； serviceName<%s>", serviceName));
             }
+            int index = ThreadLocalRandom.current().nextInt(instanceList.size());
             Instance instance = instanceList.get(0);
             log.info("use instance ip<{}> port<{}>",instance.getIp(),instance.getPort());
             ReferenceConfig<GenericService> reference = new ReferenceConfig<GenericService>();
