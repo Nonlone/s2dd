@@ -17,6 +17,7 @@
 
 	<properties>
 		<java.version>17</java.version>
+		<dubbo.version>3.1.8</dubbo.version>
 	</properties>
 
 	<dependencies>
@@ -43,41 +44,51 @@
 		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/com.alibaba.spring/spring-context-support -->
-		<dependency>
-			<groupId>com.alibaba.spring</groupId>
-			<artifactId>spring-context-support</artifactId>
-			<version>1.0.12-SNAPSHOT</version>
-		</dependency>
+		<!--<dependency>-->
+		<!--	<groupId>com.alibaba.spring</groupId>-->
+		<!--	<artifactId>spring-context-support</artifactId>-->
+		<!--	<version>1.0.12-SNAPSHOT</version>-->
+		<!--</dependency>-->
 
 
 		<!-- https://mvnrepository.com/artifact/org.apache.dubbo/dubbo-spring-boot-starter -->
-		<dependency>
-			<groupId>org.apache.dubbo</groupId>
-			<artifactId>dubbo-spring-boot-starter</artifactId>
-			<version>2.7.16</version>
-			<exclusions>
-				<exclusion>
-					<artifactId>spring-context-support</artifactId>
-					<groupId>com.alibaba.spring</groupId>
-				</exclusion>
-			</exclusions>
-		</dependency>
+		<!--<dependency>-->
+		<!--	<groupId>org.apache.dubbo</groupId>-->
+		<!--	<artifactId>dubbo-spring-boot-starter</artifactId>-->
+		<!--	<version>2.7.16</version>-->
+		<!--	<exclusions>-->
+		<!--		<exclusion>-->
+		<!--			<artifactId>spring-context-support</artifactId>-->
+		<!--			<groupId>com.alibaba.spring</groupId>-->
+		<!--		</exclusion>-->
+		<!--	</exclusions>-->
+		<!--</dependency>-->
 
 
 		<!-- https://mvnrepository.com/artifact/org.apache.dubbo/dubbo -->
+		<dependency>
+			<groupId>org.apache.dubbo</groupId>
+			<artifactId>dubbo-spring-boot-starter</artifactId>
+			<version>${dubbo.version}</version>
+		</dependency>
 		<!--<dependency>-->
 		<!--	<groupId>org.apache.dubbo</groupId>-->
 		<!--	<artifactId>dubbo</artifactId>-->
-		<!--	<version>2.7.16</version>-->
+		<!--	<version>${dubbo.version}</version>-->
+		<!--</dependency>-->
+		<dependency>
+			<groupId>org.apache.dubbo</groupId>
+			<artifactId>dubbo-native</artifactId>
+			<version>${dubbo.version}</version>
+		</dependency>
+
+		<!--<dependency>-->
+		<!--	<groupId>org.apache.dubbo</groupId>-->
+		<!--	<artifactId>dubbo-dependencies-zookeeper</artifactId>-->
+		<!--	<version>${dubbo.version}</version>-->
+		<!--	<type>pom</type>-->
 		<!--</dependency>-->
 
-		<!-- https://mvnrepository.com/artifact/javax.servlet/servlet-api -->
-		<!--<dependency>-->
-		<!--	<groupId>javax.servlet</groupId>-->
-		<!--	<artifactId>servlet-api</artifactId>-->
-		<!--	<version>2.5</version>-->
-		<!--	<scope>provided</scope>-->
-		<!--</dependency>-->
 
 		<!-- https://mvnrepository.com/artifact/javax.annotation/javax.annotation-api -->
 		<dependency>
@@ -91,6 +102,29 @@
 		<finalName>s2dd</finalName>
 		<plugins>
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.19.1</version>
+				<!--传入 jvm 参数打开模块-->
+				<configuration>
+					<skip>true</skip>
+					<!--<argLine>&#45;&#45;add-opens java.base/java.lang=ALL-UNNAMED</argLine>-->
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.dubbo</groupId>
+				<artifactId>dubbo-native-plugin</artifactId>
+				<version>${dubbo.version}</version>
+				<executions>
+					<execution>
+						<phase>process-sources</phase>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
 				<groupId>org.graalvm.buildtools</groupId>
 				<artifactId>native-maven-plugin</artifactId>
 				<configuration>
@@ -98,7 +132,52 @@
 					<buildArgs>
 						<buildArg>-H:+ReportUnsupportedElementsAtRuntime</buildArg>
 						<buildArg>-H:TraceClassInitialization=true </buildArg>
-						<buildArg>--initialize-at-build-time=org.slf4j.simple.SimpleLogger,org.slf4j.LoggerFactory,ch.qos.logback,org.slf4j.MDC</buildArg>
+						<buildArg>
+							--no-fallback
+
+							--initialize-at-build-time=org.slf4j.MDC
+							--initialize-at-build-time=org.apache.log4j.MDC
+							--initialize-at-build-time=org.slf4j.LoggerFactory
+							--initialize-at-build-time=org.slf4j.impl.StaticLoggerBinder
+							--initialize-at-build-time=org.apache.log4j.helpers.Loader
+							--initialize-at-build-time=org.apache.log4j.Logger
+							--initialize-at-build-time=org.apache.log4j.helpers.LogLog
+							--initialize-at-build-time=org.apache.log4j.LogManager
+							--initialize-at-build-time=org.apache.log4j.spi.LoggingEvent
+							--initialize-at-build-time=org.slf4j.impl.Log4jLoggerFactory
+							--initialize-at-build-time=org.slf4j.impl.Log4jLoggerAdapter
+							--initialize-at-build-time=org.eclipse.collections.api.factory.Sets
+							--initialize-at-build-time=io.netty.util.internal.logging.Log4JLogger
+
+
+							--initialize-at-run-time=io.netty.channel.epoll.Epoll
+							--initialize-at-run-time=io.netty.channel.epoll.Native
+							--initialize-at-run-time=io.netty.channel.epoll.EpollEventLoop
+							--initialize-at-run-time=io.netty.channel.epoll.EpollEventArray
+							--initialize-at-run-time=io.netty.channel.DefaultFileRegion
+							--initialize-at-run-time=io.netty.channel.kqueue.KQueueEventArray
+							--initialize-at-run-time=io.netty.channel.kqueue.KQueueEventLoop
+							--initialize-at-run-time=io.netty.channel.kqueue.Native
+							--initialize-at-run-time=io.netty.channel.unix.Errors
+							--initialize-at-run-time=io.netty.channel.unix.IovArray
+							--initialize-at-run-time=io.netty.channel.unix.Limits
+							--initialize-at-run-time=io.netty.channel.unix.Socket
+							--initialize-at-run-time=io.netty.channel.ChannelHandlerMask
+							--initialize-at-run-time=io.netty.internal.tcnative.CertificateVerifier
+							--initialize-at-run-time=io.netty.internal.tcnative.AsyncSSLPrivateKeyMethod
+							--initialize-at-run-time=io.netty.handler.ssl.ReferenceCountedOpenSslEngine
+							--initialize-at-run-time=io.netty.handler.ssl.OpenSslPrivateKeyMethod
+							--initialize-at-run-time=io.netty.internal.tcnative.CertificateVerifier
+							--initialize-at-run-time=io.netty.internal.tcnative.SSL
+							--initialize-at-run-time=io.netty.handler.ssl.OpenSslAsyncPrivateKeyMethod
+							--initialize-at-run-time=io.netty.internal.tcnative.SSLPrivateKeyMethod
+
+							--report-unsupported-elements-at-runtime
+							--allow-incomplete-classpath
+							--enable-url-protocols=http
+							-H:+ReportExceptionStackTraces
+							-H:+AllowJRTFileSystem
+						</buildArg>
 					</buildArgs>
 				</configuration>
 			</plugin>
