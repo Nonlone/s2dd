@@ -13,12 +13,15 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 
 @SpringBootApplication
-// @EnableDubbo
+@EnableDubbo
 public class Application {
 
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
+        // dubboStart();
+    }
 
+    private static void dubboStart(){
         // Dubbo 启动
         DubboBootstrap bootstrap = DubboBootstrap.getInstance();
         ApplicationConfig applicationConfig = new ApplicationConfig("s2dd");
@@ -29,13 +32,12 @@ public class Application {
         applicationConfig.setParameters(m);
 
 
-        ProtocolConfig protocolConfig = new ProtocolConfig(CommonConstants.DUBBO, -1);
+        ProtocolConfig protocolConfig = new ProtocolConfig(CommonConstants.DUBBO, 20881);
         protocolConfig.setSerialization("fastjson2");
         bootstrap.application(applicationConfig)
             // .registry(new RegistryConfig("zookeeper://127.0.0.1:2181"))
             .protocol(protocolConfig)
             .start();
-
     }
 
 }
