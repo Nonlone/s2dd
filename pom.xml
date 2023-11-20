@@ -19,143 +19,40 @@
     <properties>
         <java.version>17</java.version>
         <dubbo.version>3.2.2</dubbo.version>
+        <spring-boot.version>3.0.5</spring-boot.version>
+        <spring-boot-maven-plugin.version>3.0.5</spring-boot-maven-plugin.version>
+        <native-maven-plugin.version>0.9.27</native-maven-plugin.version>
+        <surefire.argline>${surefire.preview.arg}
+            --add-opens java.base/java.lang=ALL-UNNAMED
+            --add-opens java.base/java.util=ALL-UNNAMED
+            --add-opens java.base/java.io=ALL-UNNAMED
+            --add-opens java.base/java.time=ALL-UNNAMED
+            --add-opens java.base/java.time.chrono=ALL-UNNAMED
+            --add-opens java.base/java.lang.invoke=ALL-UNNAMED
+            --add-opens java.base/java.lang.ref=ALL-UNNAMED
+            --add-opens java.base/java.lang.reflect=ALL-UNNAMED
+            --add-opens java.base/java.text=ALL-UNNAMED
+            --add-opens java.base/javax.security.auth.x500=ALL-UNNAMED
+            --add-opens java.base/sun.util.calendar=ALL-UNNAMED
+            --add-opens java.desktop/java.beans=ALL-UNNAMED
+            --add-opens java.desktop/java.awt=ALL-UNNAMED
+            --add-opens java.desktop/java.awt.font=ALL-UNNAMED
+            --add-opens java.desktop/javax.swing=ALL-UNNAMED
+            --add-opens java.desktop/javax.swing.border=ALL-UNNAMED
+            --add-opens java.desktop/javax.swing.event=ALL-UNNAMED
+            --add-opens java.desktop/javax.swing.table=ALL-UNNAMED
+            --add-opens java.desktop/javax.swing.plaf.basic=ALL-UNNAMED
+            --add-opens java.desktop/javax.swing.plaf.metal=ALL-UNNAMED
+            --add-opens java.desktop/javax.imageio=ALL-UNNAMED
+            --add-opens java.desktop/javax.imageio.spi=ALL-UNNAMED
+            --add-opens java.desktop/sun.swing=ALL-UNNAMED
+            --add-opens java.desktop/sun.swing.table=ALL-UNNAMED
+            --add-opens java.xml/javax.xml.datatype=ALL-UNNAMED
+            --add-opens java.xml/com.sun.xml.internal.stream=ALL-UNNAMED
+            --add-opens java.xml/com.sun.org.apache.xerces.internal.parsers=ALL-UNNAMED
+            --add-opens java.xml/com.sun.org.apache.xerces.internal.util=ALL-UNNAMED
+        </surefire.argline>
     </properties>
-
-
-    <profiles>
-        <profile>
-            <id>native</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <artifactId>maven-compiler-plugin</artifactId>
-                        <configuration>
-                            <release>17</release>
-                            <fork>true</fork>
-                            <verbose>true</verbose>
-                            <compilerArguments>
-
-                            </compilerArguments>
-                            <compilerArgs>
-                                <arg>
-                                    --add-opens java.base/java.lang=ALL-UNNAMED
-                                    --add-opens java.base/java.io=ALL-UNNAMED
-                                    --add-opens java.base/java.math=ALL-UNNAMED
-                                    --add-opens java.base/java.net=ALL-UNNAMED
-                                    --add-opens java.base/java.nio=ALL-UNNAMED
-                                    --add-opens java.base/java.security=ALL-UNNAMED
-                                    --add-opens java.base/java.text=ALL-UNNAMED
-                                    --add-opens java.base/java.time=ALL-UNNAMED
-                                    --add-opens java.base/java.util=ALL-UNNAMED
-                                    --add-opens java.base/jdk.internal.access=ALL-UNNAMED
-                                    --add-opens java.base/jdk.internal.misc=ALL-UNNAMED
-                                </arg>
-                            </compilerArgs>
-                        </configuration>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.springframework.boot</groupId>
-                        <artifactId>spring-boot-maven-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>process-aot</id>
-                                <goals>
-                                    <goal>process-aot</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.graalvm.buildtools</groupId>
-                        <artifactId>native-maven-plugin</artifactId>
-                        <!--<version>0.9.22</version>-->
-                        <configuration>
-                            <classesDirectory>${project.build.outputDirectory}</classesDirectory>
-                            <metadataRepository>
-                                <enabled>true</enabled>
-                            </metadataRepository>
-                            <requiredVersion>22.3</requiredVersion>
-                            <mainClass>per.nonlone.suck2dubbo.Application</mainClass>
-                            <buildArgs>
-                                <buildArg>-H:+ReportUnsupportedElementsAtRuntime</buildArg>
-                                <buildArg>-H:TraceClassInitialization=true </buildArg>
-                                <buildArg>
-                                    --no-fallback
-
-                                    --initialize-at-build-time=org.slf4j.MDC
-                                    --initialize-at-build-time=org.apache.log4j.MDC
-                                    --initialize-at-build-time=org.slf4j.LoggerFactory
-                                    --initialize-at-build-time=org.slf4j.impl.StaticLoggerBinder
-                                    --initialize-at-build-time=org.apache.log4j.helpers.Loader
-                                    --initialize-at-build-time=org.apache.log4j.Logger
-                                    --initialize-at-build-time=org.apache.log4j.helpers.LogLog
-                                    --initialize-at-build-time=org.apache.log4j.LogManager
-                                    --initialize-at-build-time=org.apache.log4j.spi.LoggingEvent
-                                    --initialize-at-build-time=org.slf4j.impl.Log4jLoggerFactory
-                                    --initialize-at-build-time=org.slf4j.impl.Log4jLoggerAdapter
-                                    --initialize-at-build-time=org.eclipse.collections.api.factory.Sets
-                                    --initialize-at-build-time=io.netty.util.internal.logging.Log4JLogger
-
-
-                                    --initialize-at-run-time=io.netty.channel.epoll.Epoll
-                                    --initialize-at-run-time=io.netty.channel.epoll.Native
-                                    --initialize-at-run-time=io.netty.channel.epoll.EpollEventLoop
-                                    --initialize-at-run-time=io.netty.channel.epoll.EpollEventArray
-                                    --initialize-at-run-time=io.netty.channel.DefaultFileRegion
-                                    --initialize-at-run-time=io.netty.channel.kqueue.KQueueEventArray
-                                    --initialize-at-run-time=io.netty.channel.kqueue.KQueueEventLoop
-                                    --initialize-at-run-time=io.netty.channel.kqueue.Native
-                                    --initialize-at-run-time=io.netty.channel.unix.Errors
-                                    --initialize-at-run-time=io.netty.channel.unix.IovArray
-                                    --initialize-at-run-time=io.netty.channel.unix.Limits
-                                    --initialize-at-run-time=io.netty.channel.unix.Socket
-                                    --initialize-at-run-time=io.netty.channel.ChannelHandlerMask
-                                    --initialize-at-run-time=io.netty.internal.tcnative.CertificateVerifier
-                                    --initialize-at-run-time=io.netty.internal.tcnative.AsyncSSLPrivateKeyMethod
-                                    --initialize-at-run-time=io.netty.handler.ssl.ReferenceCountedOpenSslEngine
-                                    --initialize-at-run-time=io.netty.handler.ssl.OpenSslPrivateKeyMethod
-                                    --initialize-at-run-time=io.netty.internal.tcnative.CertificateVerifier
-                                    --initialize-at-run-time=io.netty.internal.tcnative.SSL
-                                    --initialize-at-run-time=io.netty.handler.ssl.OpenSslAsyncPrivateKeyMethod
-                                    --initialize-at-run-time=io.netty.internal.tcnative.SSLPrivateKeyMethod
-
-                                    --report-unsupported-elements-at-runtime
-                                    --allow-incomplete-classpath
-                                    --enable-url-protocols=http
-                                    -H:+ReportExceptionStackTraces
-                                    -H:+AllowJRTFileSystem
-                                </buildArg>
-                            </buildArgs>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <id>add-reachability-metadata</id>
-                                <goals>
-                                    <goal>add-reachability-metadata</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.dubbo</groupId>
-                        <artifactId>dubbo-maven-plugin</artifactId>
-                        <version>${dubbo.version}</version>
-                        <configuration>
-                            <mainClass>per.nonlone.suck2dubbo.Application</mainClass>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <phase>process-sources</phase>
-                                <goals>
-                                    <goal>dubbo-process-aot</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
 
     <dependencies>
         <dependency>
@@ -193,6 +90,9 @@
             <artifactId>dubbo</artifactId>
             <version>${dubbo.version}</version>
         </dependency>
+
+
+
         <dependency>
             <groupId>org.apache.dubbo</groupId>
             <artifactId>dubbo-config-spring</artifactId>
@@ -206,6 +106,77 @@
 
     </dependencies>
 
+    <profiles>
+        <profile>
+            <id>native</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <version>3.10.1</version>
+                        <configuration>
+                            <release>17</release>
+                            <fork>true</fork>
+                            <verbose>true</verbose>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.springframework.boot</groupId>
+                        <artifactId>spring-boot-maven-plugin</artifactId>
+                        <version>${spring-boot-maven-plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>process-aot</id>
+                                <goals>
+                                    <goal>process-aot</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.graalvm.buildtools</groupId>
+                        <artifactId>native-maven-plugin</artifactId>
+                        <version>${native-maven-plugin.version}</version>
+                        <configuration>
+                            <classesDirectory>${project.build.outputDirectory}</classesDirectory>
+                            <metadataRepository>
+                                <enabled>true</enabled>
+                            </metadataRepository>
+                            <requiredVersion>22.3</requiredVersion>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>add-reachability-metadata</id>
+                                <goals>
+                                    <goal>add-reachability-metadata</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.dubbo</groupId>
+                        <artifactId>dubbo-maven-plugin</artifactId>
+                        <version>${dubbo.version}</version>
+                        <configuration>
+                            <mainClass>per.nonlone.suck2dubbo.Application</mainClass>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <phase>process-sources</phase>
+                                <goals>
+                                    <goal>dubbo-process-aot</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
+
+    <!--
     <build>
         <finalName>s2dd</finalName>
         <plugins>
@@ -220,6 +191,24 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+    -->
+    <build>
+        <finalName>s2dd</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>${spring-boot-maven-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
